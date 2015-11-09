@@ -20,4 +20,9 @@ defmodule PdfParserTest do
   test "Parsing a reference" do
     assert {:ptr, 12, 0} == PdfParser.parse("ptr 12 0")
   end
+
+  test "Parsing arrays" do
+    assert [1, 2.0, 17, "Who made this up?"] ==
+           PdfParser.parse("[ 1 2.0 17 (Who made this up?)]")
+  end
 end
