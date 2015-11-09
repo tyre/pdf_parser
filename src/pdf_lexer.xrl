@@ -11,7 +11,7 @@ DICTIONARY_START  = <<
 DICTIONARY_END    = >>
 ARRAY_START       = \[
 ARRAY_END         = \]
-NAME              = /[^\s\t\n\r]+
+NAME              = [^\s\t\n\r]+
 TRUE              = true
 FALSE             = false
 
@@ -25,12 +25,14 @@ ptr{WHITESPACE}+{INTEGER}{WHITESPACE}+{INTEGER} : Reference = extract_reference(
 {FALSE}                       : {token, {false, TokenLine}}.
 {INTEGER}                     : {token, {integer,  TokenLine, list_to_integer(TokenChars)}}.
 {FLOAT}                       : {token, {float, TokenLine, list_to_float(TokenChars)}}.
-{STRING_START}.*{STRING_END}  : S = strip(TokenChars, TokenLen),
+{STRING_START}[^{STRING_END}]*{STRING_END}  : S = strip(TokenChars, TokenLen),
                                 {token, {string, TokenLine, S}}.
 {ARRAY_START}                 : {token, {array_start, TokenLine}}.
 {ARRAY_END}                   : {token, {array_end, TokenLine}}.
 {DICTIONARY_START}            : {token, {dictionary_start, TokenLine}}.
 {DICTIONARY_END}              : {token, {dictionary_end, TokenLine}}.
+\/{NAME}                      : Atom = name_to_atom(TokenChars),
+                                {token, {name, TokenLine, Atom}}.
 {WHITESPACE}+                 : skip_token.
 
 Erlang code.
@@ -41,3 +43,5 @@ strip(TokenChars,TokenLen) ->
 extract_reference(<<"ptr ", Rest/binary>>) ->
     [Object, Generation] = binary:split(Rest, [<<" ">>]),
     list_to_tuple([ptr, binary_to_integer(Object), binary_to_integer(Generation)]).
+
+name_to_atom([$/|Atom]) -> list_to_atom(Atom).

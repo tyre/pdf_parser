@@ -24,5 +24,18 @@ defmodule PdfParserTest do
   test "Parsing arrays" do
     assert [1, 2.0, 17, "Who made this up?"] ==
            PdfParser.parse("[ 1 2.0 17 (Who made this up?)]")
+    assert ["an", "array"] == PdfParser.parse("[(an) (array)]")
+
+    assert [:A, :B, :C] == PdfParser.parse("[/A /B  /C ]")
+  end
+
+  test "Parsing dictionaries" do
+    assert [{:key, 1.0}, {:another, "VALUE"}, {:WhyNot, ["an", "array"]}] ==
+           PdfParser.parse("<< /key 1.0 /another (VALUE) /WhyNot [(an) (array)] >> ")
+  end
+
+  test "Parsing nested dictionaries" do
+    assert [{:one, [{:two_a, 5}, {:two_b, "Bones"}]}, {:to_the_top!, [:A, :B, :C]}] ==
+           PdfParser.parse("<< /one <</two_a 5 /two_b (Bones) >> /to_the_top! [ /A /B /C ]>>")
   end
 end
